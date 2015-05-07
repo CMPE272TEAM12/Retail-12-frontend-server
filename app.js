@@ -10,7 +10,7 @@ var express = require('express')
   //Add Page Here ruotes
   , routes = require('./controllers/routes/index')
   , loginMediator = require('./controllers/makerequest/login')
-//  , clientMediator = require('./controllers/makerequest/client_mediator')
+
 //  , person_Info = require('./controllers/makerequest/person_Info')
 //  , building = require('./controllers/makerequest/building_mediator');
 
