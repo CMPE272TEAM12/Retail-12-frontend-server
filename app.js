@@ -12,7 +12,6 @@ var express = require('express')
   , loginMediator = require('./controllers/makerequest/login')
 
 
-//  , building = require('./controllers/makerequest/building_mediator');
 
 var apicache = require('apicache').options({ debug: true }).middleware;
 
