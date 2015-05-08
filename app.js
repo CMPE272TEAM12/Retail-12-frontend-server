@@ -7,10 +7,9 @@ var express = require('express')
   , session = require('express-session')
   , RedisStore = require('connect-redis')(session)
 
-  //Add Page Here ruotes
+
   , routes = require('./controllers/routes/index')
   , loginMediator = require('./controllers/makerequest/login')
-
 
 
 var apicache = require('apicache').options({ debug: true }).middleware;
