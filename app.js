@@ -7,7 +7,7 @@ var express = require('express')
   , session = require('express-session')
   , RedisStore = require('connect-redis')(session)
 
-
+  , product = require('./controllers/angular_controller/js/product')
   , routes = require('./controllers/routes/index')
   , loginMediator = require('./controllers/makerequest/login')
 
@@ -95,6 +95,19 @@ app.get('/error',routes.error);
 app.get('/dashboard', routes.dashboard); 
 app.get('/client_dashboard', routes.load);
 app.get('/guard_dashboard', routes.guardPage);
+
+
+app.post('/addproduct',product.addProduct);
+
+app.post('/updateproduct',product.updateProduct);
+
+app.post('/soldproduct',product.soldProduct);
+
+app.get('/getproduct',product.getProduct);
+
+
+
+
 
 
 //--- Guard start----- 
