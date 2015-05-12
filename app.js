@@ -7,7 +7,7 @@ var express = require('express')
   , session = require('express-session')
   , RedisStore = require('connect-redis')(session)
 
-  , product = require('./controllers/angular_controller/js/product')
+  , product = require('./controllers/makerequest/product')
   , routes = require('./controllers/routes/index')
   , loginMediator = require('./controllers/makerequest/login')
 
@@ -25,14 +25,17 @@ app.use(express.logger('dev'));
 app.use(express.methodOverride());
 app.use(express.bodyParser());
 app.use(express.cookieParser());
-app.use(session({
-	store: new RedisStore({ // Session stored in redis
-		  host:'127.0.0.1', // redis-server thats on localhost
-		  port: 6379, // access on port
-		  ttl: 60*1000 // in seconds
-		}), 
-	secret: 'CMPE273TEAM2' 
-}));
+//app.use(session({
+//	store: new RedisStore({ // Session stored in redis
+//		  host:'127.0.0.1', // redis-server thats on localhost
+//		  port: 6379, // access on port
+//		  ttl: 60*1000 // in seconds
+//		}), 
+//	secret: 'CMPE273TEAM2' 
+//}));
+
+app.use(express.session({secret: 'name it', cookie: { maxAge: 600000}}));
+
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/controllers',  express.static(__dirname + '/controllers'));
 app.use('/views',  express.static(__dirname + '/views'));

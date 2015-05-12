@@ -1,5 +1,5 @@
-var mq_client = require('../../../rpc/client');
-var utility = require('../../makerequest/utility');
+var mq_client = require('../../rpc/client');
+var utility = require('./utility');
 
 exports.addProduct = addProduct;
 exports.updateProduct = updateProduct;
