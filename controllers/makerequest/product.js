@@ -27,8 +27,10 @@ function soldProduct(req,res){
 function addProduct(req,res){
 
 	var msg_payload = {
-			"product_id":req.params("productID"),
-			"product_cost":req.params("productCost"),
+			"product_code":req.params("productCode"),
+			"product_name":req.params("productName"),
+			"product_price":req.params("productPrice"),
+			"store_id":2,
 			"type":"add"
 	}
 	
@@ -38,8 +40,10 @@ function addProduct(req,res){
 function updateProduct(req,res){
 
 	var msg_payload = {
-			"product_id":req.params("productID"),
-			"product_cost":req.params("productCost"),
+			"product_code":req.params("productCode"),
+			"product_name":req.params("productName"),
+			"product_price":req.params("productPrice"),
+			"store_id":2,
 			"type":"update"
 	}	
 	utility.send_request('product_queue',msg_payload,req,res);
