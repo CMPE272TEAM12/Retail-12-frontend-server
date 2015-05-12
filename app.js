@@ -108,7 +108,7 @@ app.post('/soldproduct',product.soldProduct);
 
 app.get('/getproduct',product.getProduct);
 
-
+//app.get('/addemployee',employee.addEmployee);
 
 
 
