@@ -6,7 +6,7 @@ var express = require('express')
   , path = require('path')
   , session = require('express-session')
   , RedisStore = require('connect-redis')(session)
-
+  , employee = require('./controllers/makerequest/employee')
   , product = require('./controllers/makerequest/product')
   , routes = require('./controllers/routes/index')
   , loginMediator = require('./controllers/makerequest/login')
@@ -108,7 +108,7 @@ app.post('/soldproduct',product.soldProduct);
 
 app.get('/getproduct',product.getProduct);
 
-//app.get('/addemployee',employee.addEmployee);
+app.get('/addemployee',employee.addEmployee);
 
 
 
