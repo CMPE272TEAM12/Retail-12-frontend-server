@@ -35,7 +35,7 @@ function after_login (req, res) {
 //	//} else {
 //	//	res.send({"value":"Fail", "status":false, "Message":"Please enter both the values to login"});
 //	//}
-	
+	console.log(req.param("employeecode"));
 	var msg_payload = {
 			"empcode":req.param("employeecode"),
 			"type":"login"
