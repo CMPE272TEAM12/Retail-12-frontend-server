@@ -117,6 +117,8 @@ app.get('/getemployee',employee.getEmployee);
 
 app.get('/getproductshistory',product.getproducthistory);
 
+app.post('/login', loginMediator.after_login);
+
 var tweetCount = 0;
 var tweetTotalSentiment = 0;
 var monitoringPhrase;
@@ -135,17 +137,7 @@ var monitoringPhrase;
 //    monitoringPhrase = "";
 //});
 
-var tweeter = new twit({
 
-    consumer_key: 'fQe0ZFl9PlW1u95gwSgHN19VM',
-
-    consumer_secret: 'GIwCckYMXbzVppNFftdFToTxLqyXjgQ79ZaZg1VzxutbWwZaVd',
-
-    access_token: 543223113+'-aH6Ja20Sz3HopfQdouUmCuPthfaz4a2leLD8AkzS',
-
-    access_token_secret: 'eKgpcveRHNnK4lKUqiDb2qBUEjKyQPjX6e22ThOJFVjnh'
-
-});
 
 //app.get('/monitor',function beginMonitoring(phrase) {
 //    var stream;
@@ -235,11 +227,32 @@ function sentimentImage() {
 
 app.get('/monitor',function (req,res) {
     var stream;
-    var score
+    var score;
     // cleanup if we're re-setting the monitoring
 //    if (monitoringPhrase) {
 //        resetMonitoring();
 //    }
+    
+    var msg_payload = {
+    		"type":"sentiment"
+    }
+    
+    mq_client.make_request('product_queue', message, function(err,results){
+		
+		if(err){
+			console.log("Post request Error");
+			throw err;
+		} else  {
+			if(results.code === "200"){
+				res.send({"value":"Success", "status": true});
+			} else {    
+				res.send({"value":"Fail", "status":false});
+			}
+		}  
+	});
+    
+    
+    
     monitoringPhrase = 'ISIS';
     var today = new Date();
     //console.log("hh"+phrase);
@@ -310,7 +323,7 @@ function performAnalysis(tweetSet) {
 
 
 
-app.post('/login', loginMediator.after_login);
+
 //app.post('/addalertdetail',guardMediator.add_alert);
 app.post('/logout', loginMediator.logout);
 
