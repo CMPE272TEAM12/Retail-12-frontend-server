@@ -2,7 +2,16 @@ var mq_client = require('../../rpc/client');
 var utility = require('./utility');
 
 exports.addEmployee = addEmployee;
+exports.getEmployee = getEmployee;
 
+
+function getEmployee(req,res){
+	var msg_payload = {		
+			"type":"get"
+	}
+	
+	utility.get_request('employee_queue',msg_payload,req,res);
+}
 function addEmployee(req,res){
 	var msg_payload = {
 			"emp_code":req.params("empCode"),

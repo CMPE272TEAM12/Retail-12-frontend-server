@@ -112,6 +112,8 @@ app.get('/getproduct',product.getProduct);
 
 app.get('/addemployee',employee.addEmployee);
 
+app.get('/getemployee',employee.getEmployee);
+
 
 var tweetCount = 0;
 var tweetTotalSentiment = 0;

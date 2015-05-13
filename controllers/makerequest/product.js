@@ -27,9 +27,7 @@ function soldProduct(req,res){
 function addProduct(req,res){
 
 	var msg_payload = {
-			"product_code":req.param("productCode"),
-			"product_name":req.param("productName"),
-			"product_price":req.param("productPrice"),
+			"itemList":req.param("itemList"),
 			"store_id":2,
 			"type":"add"
 	}
