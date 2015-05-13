@@ -114,6 +114,7 @@ app.get('/addemployee',employee.addEmployee);
 
 app.get('/getemployee',employee.getEmployee);
 
+app.get('/getproductshistory',product.getproducthistory);
 
 var tweetCount = 0;
 var tweetTotalSentiment = 0;
@@ -129,7 +130,6 @@ var monitoringPhrase;
 //});
 
 
-
 //app.get('/reset',function resetMonitoring() {
 //    monitoringPhrase = "";
 //});
@@ -140,7 +140,7 @@ app.get('/monitor',function beginMonitoring(phrase) {
     if (monitoringPhrase) {
         resetMonitoring();
     }
-    monitoringPhrase = 'IPHONE6';
+    monitoringPhrase = 'Parle-G';
     //console.log("hh"+phrase);
     tweetCount = 0;
     tweetTotalSentiment = 0;

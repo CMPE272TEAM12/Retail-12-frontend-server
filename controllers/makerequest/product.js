@@ -5,6 +5,15 @@ exports.addProduct = addProduct;
 exports.updateProduct = updateProduct;
 exports.soldProduct = soldProduct;
 exports.getProduct = getProduct;
+exports.getproducthistory = getproducthistory;
+
+function getproducthistory(req,res){
+	var msg_payload = {
+			"noDays":req.param("noOfDays"),
+			"type":"producthistory"
+	}
+	utility.get_request('product_queue',msg_payload,req,res);
+}
 
 function getProduct(req,res){
 	var msg_payload = {
