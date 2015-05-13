@@ -15,6 +15,8 @@ var express = require('express')
 var apicache = require('apicache').options({ debug: true }).middleware;
 
 var app = express();
+var twitter = require('ntwitter');
+var sentiment = require('sentiment');
 
 // all environments
 app.set('port', process.env.PORT || 3232);
@@ -91,7 +93,7 @@ console.log("token : "+req.session.token);
 
 // All get request defined here
 //get Request
-app.get('/', routes.index);
+//app.get('/', routes.index);
 //get login page
 app.get('/login', routes.login);
 app.get('/error',routes.error);
@@ -109,6 +111,156 @@ app.post('/soldproduct',product.soldProduct);
 app.get('/getproduct',product.getProduct);
 
 app.get('/addemployee',employee.addEmployee);
+
+
+var tweetCount = 0;
+var tweetTotalSentiment = 0;
+var monitoringPhrase;
+
+
+	
+
+//app.get('/twitterCheck', function (req, res) {
+//    tweeter.verifyCredentials(function (error, data) {
+//        res.send("Hello, " + data.name + ".  I am in your twitters.");
+//    });
+//});
+
+
+
+//app.get('/reset',function resetMonitoring() {
+//    monitoringPhrase = "";
+//});
+
+app.get('/monitor',function beginMonitoring(phrase) {
+    var stream;
+    // cleanup if we're re-setting the monitoring
+    if (monitoringPhrase) {
+        resetMonitoring();
+    }
+    monitoringPhrase = 'IPHONE6';
+    //console.log("hh"+phrase);
+    tweetCount = 0;
+    tweetTotalSentiment = 0;
+    tweeter.verifyCredentials(function (error, data) {
+        if (error) {
+            return "Error connecting to Twitter: " + error;
+        } else {
+            stream = tweeter.stream('statuses/filter', {
+                'track': monitoringPhrase
+            }, function (stream) {
+                console.log("Monitoring Twitter for " + data.lang);
+                stream.on('data', function (data) {
+                    // only evaluate the sentiment of English-language tweets
+                    if (data.lang === 'en') {
+                        sentiment('SaveTheInternet', function (err, result) {
+                        	console.log("in sentiment");
+                            tweetCount++;
+                            tweetTotalSentiment += result.score;
+                        });
+                    }
+                });
+            });
+            return stream;
+        }
+    });
+});
+
+
+app.get('/',
+    function (req, res) {
+        var welcomeResponse = "<HEAD>" +
+            "<title>Twitter Sentiment Analysis</title>\n" +
+            "</HEAD>\n" +
+            "<BODY>\n" +
+            "<P>\n" +
+            "Welcome to the Twitter Sentiment Analysis app.<br>\n" + 
+            "What would you like to monitor?\n" +
+            "</P>\n" +
+            "<FORM action=\"/monitor\" method=\"get\">\n" +
+            "<P>\n" +
+            "<INPUT type=\"text\" name=\"phrase\"><br><br>\n" +
+            "<INPUT type=\"submit\" value=\"Go\">\n" +
+            "</P>\n" + "</FORM>\n" + "</BODY>";
+        if (!monitoringPhrase) {
+            res.send(welcomeResponse);
+        } else {
+            var monitoringResponse = "<HEAD>" +
+                "<META http-equiv=\"refresh\" content=\"5; URL=http://" +
+                req.headers.host +
+                "/\">\n" +
+                "<title>Twitter Sentiment Analysis</title>\n" +
+                "</HEAD>\n" +
+                "<BODY>\n" +
+                "<P>\n" +
+                "The Twittersphere is feeling<br>\n" +
+                "<IMG align=\"middle\" src=\"" + sentimentImage() + "\"/><br>\n" +
+                "about " + monitoringPhrase + ".<br><br>" +
+                "Analyzed " + tweetCount + " tweets...<br>" +
+                "</P>\n" +
+                "<A href=\"/reset\">Monitor another phrase</A>\n" +
+                "</BODY>";
+            res.send(monitoringResponse);
+        }
+    });
+
+
+function sentimentImage() {
+    var avg = tweetTotalSentiment / tweetCount;
+    if (avg > 0.5) { // happy
+        return "/images/excited.png";
+    }
+    if (avg < -0.5) { // angry
+        return "/images/angry.png";
+    }
+    // neutral
+    return "/images/content.png";
+}
+
+//app.get('/',
+//    function (req, res) {
+//        var welcomeResponse = "<HEAD>" +
+//            "<title>Twitter Sentiment Analysis</title>\n" +
+//            "</HEAD>\n" +
+//            "<BODY>\n" +
+//            "<P>\n" +
+//            "Welcome to the Twitter Sentiment Analysis app.<br>\n" + 
+//            "What would you like to monitor?\n" +
+//            "</P>\n" +
+//            "<FORM action=\"/monitor\" method=\"get\">\n" +
+//            "<P>\n" +
+//            "<INPUT type=\"text\" name=\"phrase\"><br><br>\n" +
+//            "<INPUT type=\"submit\" value=\"Go\">\n" +
+//            "</P>\n" + "</FORM>\n" + "</BODY>";
+//        if (!monitoringPhrase) {
+//            res.send(welcomeResponse);
+//        } else {
+//            var monitoringResponse = "<HEAD>" +
+//                "<META http-equiv=\"refresh\" content=\"5; URL=http://" +
+//                req.headers.host +
+//                "/\">\n" +
+//                "<title>Twitter Sentiment Analysis</title>\n" +
+//                "</HEAD>\n" +
+//                "<BODY>\n" +
+//                "<P>\n" +
+//                "The Twittersphere is feeling<br>\n" +
+//                "<IMG align=\"middle\" src=\"" + sentimentImage() + "\"/><br>\n" +
+//                "about " + monitoringPhrase + ".<br><br>" +
+//                "Analyzed " + tweetCount + " tweets...<br>" +
+//                "</P>\n" +
+//                "<A href=\"/reset\">Monitor another phrase</A>\n" +
+//                "</BODY>";
+//            res.send(monitoringResponse);
+//        }
+//    });
+
+
+
+
+
+
+
+
 
 
 

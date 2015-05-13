@@ -15,21 +15,21 @@ function getProduct(req,res){
 }
 
 function soldProduct(req,res){
+	
 	var msg_payload = {
-			"product_id":req.params("productID"),
-			"product_cost":req.params("productCost"),
+			"itemList":req.param("itemList"),
 			"type":"sold"
 	}
 	
 	utility.send_request('product_queue',msg_payload,req,res);
-	
 }
+
 function addProduct(req,res){
 
 	var msg_payload = {
-			"product_code":req.params("productCode"),
-			"product_name":req.params("productName"),
-			"product_price":req.params("productPrice"),
+			"product_code":req.param("productCode"),
+			"product_name":req.param("productName"),
+			"product_price":req.param("productPrice"),
 			"store_id":2,
 			"type":"add"
 	}
