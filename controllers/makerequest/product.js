@@ -9,7 +9,7 @@ exports.getproducthistory = getproducthistory;
 
 function getproducthistory(req,res){
 	var msg_payload = {
-			"noDays":req.param("noOfDays"),
+			"noDays":7,
 			"type":"producthistory"
 	}
 	utility.get_request('product_queue',msg_payload,req,res);

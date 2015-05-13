@@ -115,7 +115,7 @@ app.get('/addemployee',employee.addEmployee);
 
 app.get('/getemployee',employee.getEmployee);
 
-app.get('/getproductshistory',product.getproducthistory);
+app.get('/getproducthistory',product.getproducthistory);
 
 app.post('/login', loginMediator.after_login);
 
