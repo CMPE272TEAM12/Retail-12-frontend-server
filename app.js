@@ -135,17 +135,7 @@ var monitoringPhrase;
 //    monitoringPhrase = "";
 //});
 
-var tweeter = new twit({
 
-    consumer_key: 'fQe0ZFl9PlW1u95gwSgHN19VM',
-
-    consumer_secret: 'GIwCckYMXbzVppNFftdFToTxLqyXjgQ79ZaZg1VzxutbWwZaVd',
-
-    access_token: 543223113+'-aH6Ja20Sz3HopfQdouUmCuPthfaz4a2leLD8AkzS',
-
-    access_token_secret: 'eKgpcveRHNnK4lKUqiDb2qBUEjKyQPjX6e22ThOJFVjnh'
-
-});
 
 //app.get('/monitor',function beginMonitoring(phrase) {
 //    var stream;
@@ -240,7 +230,7 @@ app.get('/monitor',function (req,res) {
 //    if (monitoringPhrase) {
 //        resetMonitoring();
 //    }
-    monitoringPhrase = 'NDTV';
+    monitoringPhrase = 'ISIS';
     var today = new Date();
     //console.log("hh"+phrase);
     tweetCount = 0;
