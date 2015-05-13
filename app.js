@@ -16,7 +16,8 @@ var apicache = require('apicache').options({ debug: true }).middleware;
 
 var app = express();
 var twitter = require('ntwitter');
-var sentiment = require('sentiment');
+var sentimental = require('Sentimental');
+var twit = require('twit');
 
 // all environments
 app.set('port', process.env.PORT || 3232);
@@ -120,7 +121,7 @@ var tweetCount = 0;
 var tweetTotalSentiment = 0;
 var monitoringPhrase;
 
-
+//var config = require("./config");
 	
 
 //app.get('/twitterCheck', function (req, res) {
@@ -134,39 +135,51 @@ var monitoringPhrase;
 //    monitoringPhrase = "";
 //});
 
-app.get('/monitor',function beginMonitoring(phrase) {
-    var stream;
-    // cleanup if we're re-setting the monitoring
-    if (monitoringPhrase) {
-        resetMonitoring();
-    }
-    monitoringPhrase = 'Parle-G';
-    //console.log("hh"+phrase);
-    tweetCount = 0;
-    tweetTotalSentiment = 0;
-    tweeter.verifyCredentials(function (error, data) {
-        if (error) {
-            return "Error connecting to Twitter: " + error;
-        } else {
-            stream = tweeter.stream('statuses/filter', {
-                'track': monitoringPhrase
-            }, function (stream) {
-                console.log("Monitoring Twitter for " + data.lang);
-                stream.on('data', function (data) {
-                    // only evaluate the sentiment of English-language tweets
-                    if (data.lang === 'en') {
-                        sentiment('SaveTheInternet', function (err, result) {
-                        	console.log("in sentiment");
-                            tweetCount++;
-                            tweetTotalSentiment += result.score;
-                        });
-                    }
-                });
-            });
-            return stream;
-        }
-    });
+var tweeter = new twit({
+
+    consumer_key: 'fQe0ZFl9PlW1u95gwSgHN19VM',
+
+    consumer_secret: 'GIwCckYMXbzVppNFftdFToTxLqyXjgQ79ZaZg1VzxutbWwZaVd',
+
+    access_token: 543223113+'-aH6Ja20Sz3HopfQdouUmCuPthfaz4a2leLD8AkzS',
+
+    access_token_secret: 'eKgpcveRHNnK4lKUqiDb2qBUEjKyQPjX6e22ThOJFVjnh'
+
 });
+
+//app.get('/monitor',function beginMonitoring(phrase) {
+//    var stream;
+//    // cleanup if we're re-setting the monitoring
+//    if (monitoringPhrase) {
+//        resetMonitoring();
+//    }
+//    monitoringPhrase = 'NDTV';
+//    //console.log("hh"+phrase);
+//    tweetCount = 0;
+//    tweetTotalSentiment = 0;
+//    tweeter.verifyCredentials(function (error, data) {
+//        if (error) {
+//            return "Error connecting to Twitter: " + error;
+//        } else {
+//            stream = tweeter.stream('statuses/filter', {
+//                'track': monitoringPhrase
+//            }, function (stream) {
+//                console.log("Monitoring Twitter for " + data.lang);
+//                stream.on('data', function (data) {
+//                    // only evaluate the sentiment of English-language tweets
+//                    if (data.lang === 'en') {
+//                        sentiment(monitoringPhrase, function (err, result) {
+//                        	console.log("Total TweetCount"+tweetCount+"Sentiment"+tweetTotalSentiment);
+//                            tweetCount++;
+//                            tweetTotalSentiment += result.score;
+//                        });
+//                    }
+//                });
+//            });
+//            return stream;
+//        }
+//    });
+//});
 
 
 app.get('/',
@@ -219,132 +232,88 @@ function sentimentImage() {
     return "/images/content.png";
 }
 
-//app.get('/',
-//    function (req, res) {
-//        var welcomeResponse = "<HEAD>" +
-//            "<title>Twitter Sentiment Analysis</title>\n" +
-//            "</HEAD>\n" +
-//            "<BODY>\n" +
-//            "<P>\n" +
-//            "Welcome to the Twitter Sentiment Analysis app.<br>\n" + 
-//            "What would you like to monitor?\n" +
-//            "</P>\n" +
-//            "<FORM action=\"/monitor\" method=\"get\">\n" +
-//            "<P>\n" +
-//            "<INPUT type=\"text\" name=\"phrase\"><br><br>\n" +
-//            "<INPUT type=\"submit\" value=\"Go\">\n" +
-//            "</P>\n" + "</FORM>\n" + "</BODY>";
-//        if (!monitoringPhrase) {
-//            res.send(welcomeResponse);
-//        } else {
-//            var monitoringResponse = "<HEAD>" +
-//                "<META http-equiv=\"refresh\" content=\"5; URL=http://" +
-//                req.headers.host +
-//                "/\">\n" +
-//                "<title>Twitter Sentiment Analysis</title>\n" +
-//                "</HEAD>\n" +
-//                "<BODY>\n" +
-//                "<P>\n" +
-//                "The Twittersphere is feeling<br>\n" +
-//                "<IMG align=\"middle\" src=\"" + sentimentImage() + "\"/><br>\n" +
-//                "about " + monitoringPhrase + ".<br><br>" +
-//                "Analyzed " + tweetCount + " tweets...<br>" +
-//                "</P>\n" +
-//                "<A href=\"/reset\">Monitor another phrase</A>\n" +
-//                "</BODY>";
-//            res.send(monitoringResponse);
-//        }
-//    });
+
+app.get('/monitor',function (req,res) {
+    var stream;
+    var score
+    // cleanup if we're re-setting the monitoring
+//    if (monitoringPhrase) {
+//        resetMonitoring();
+//    }
+    monitoringPhrase = 'NDTV';
+    var today = new Date();
+    //console.log("hh"+phrase);
+    tweetCount = 0;
+    tweetTotalSentiment = 0;
+    //tweeter.verifyCredentials(function (error, data) {
+    //    if (error) {
+    //        return "Error connecting to Twitter: " + error;
+    //    } else {
+        	tweeter.get('search/tweets', {q: '' + monitoringPhrase + ' since:' + today.getFullYear() + '-' +
+        	      (today.getMonth() + 1) + '-' + today.getDate(), count:200}, function(err, data) {
+        	        // perform sentiment analysis
+        	    	// console.log(data['statuses']);
+        	        score = performAnalysis(data['statuses']);
+        	        console.log("score:", score);
+        	      //  console.log("choice:", choices[i]);
+        	        //  determine winner
+//        	        if(score > highestScore) {
+//        	          highestScore = score;
+//        	          highestChoice = choices[i];
+//        	          console.log("winner:",choices[i]);
+//        	        }
+        	 //       console.log("");
+        	      });
+           // return stream;
+     //   }
+   // });
+});
+
+function performAnalysis(tweetSet) {
+	  //set a results variable
+	  var results = 0;
+	  // iterate through the tweets, pulling the text, retweet count, and favorite count
+	  for(var i = 0; i < tweetSet.length; i++) {
+	    tweet = tweetSet[i]['text'];
+	    retweets = tweetSet[i]['retweet_count'];
+	    favorites = tweetSet[i]['favorite_count'];
+	    // remove the hastag from the tweet text
+	    tweet = tweet.replace('#', '');
+	    // perform sentiment on the text
+	    var score = sentimental.analyze(tweet)['score'];
+	    // calculate score
+	    results += score;
+	    if(score > 0){
+	      if(retweets > 0) {
+	        results += (Math.log(retweets)/Math.log(2));
+	      }
+	      if(favorites > 0) {
+	        results += (Math.log(favorites)/Math.log(2));
+	      }
+	    }
+	    else if(score < 0){
+	      if(retweets > 0) {
+	        results -= (Math.log(retweets)/Math.log(2));
+	      }
+	      if(favorites > 0) {
+	        results -= (Math.log(favorites)/Math.log(2));
+	      }
+	    }
+	    else {
+	      results += 0;
+	    }
+	  }
+	  // return score
+	  results = results / tweetSet.length;
+	  return results;
+	}
 
 
 
-
-
-
-
-
-
-
-
-
-//--- Guard start----- 
-//guardMediator -> filename - guard_mediator
-//app.get('/guards',guardMediator.getAllGuardDetails);
-//app.get('/getalerttype',guardMediator.get_alert_types);
-//app.get('/getGuardTimelineDetail',guardMediator.get_timeline_details);
-//app.get('/getGetBuildingList',guardMediator.get_building_list);
-//app.get('/getSchedule/:month',guardMediator.get_schedule);
-
-//--- Guard End -----
-// Client
-//app.get('/clients', clientMediator.getAllClientDetails); // Vipul Kanade - 20-Apr-2015
-//app.get('/totalNumberOfClients', clientMediator.get_Total_Number_Of_Clients);
-//app.get('/totalNumberOfPendingClients', clientMediator.get_Total_Number_Of_Pending_Clients);
-//app.get('/getDonutData',clientMediator.getDonutData);
-//app.get('/getBarGraphData',clientMediator.getBarGraphData);
-//app.get('/getTotalAlertCountPerClient',clientMediator.getTotalAlertCountPerClient);
-//app.get('/getTotalBuildingCountPerClient',clientMediator.getTotalBuildingCountPerClient);
-//
-//app.get('/getCheckPointsForClient',clientMediator.getCheckPointsForClient);
-
-// Alerts
-//app.get('/getAlertReport', clientMediator.getAlertReports);
-//app.get('/getTotalNumberOfAlerts', clientMediator.getTotalNumberOfAlerts);
-
-// building
-//app.get('/getBuildingReport', clientMediator.getBuildingReports);
-//app.get('/getTotalRevenueDetails', building.get_Total_Revenue_For_All_Building);
-//
-//app.get('/getDueDetails', clientMediator.getDueDetails);  
-//app.get('/getDailyReports', clientMediator.getDailyReports); 
-//app.get('/getAlertDashboardReports', clientMediator.getAlertDashBoardReports);
-
-// Building
-//app.get('/getAllBuildingDetails', building.get_All_Building_Details);
-//app.get('/totalNumberBuildings', building.get_Total_Number_Of_Buildings);
-//app.get('/totalNumberBuildingsForClient', building.getTotalNumberOfBuldingsForClient);
-//
-//app.get('/getPersonNameType', person_Info.getPersonNameTypeDetails);
-//
-//app.get('/getBillReports',clientMediator.getBillReports);
-//
-//app.get('/getcheckpoint',guardMediator.getAllCheckpoints);
-
-
-// All post request defined here
-// post login credentials for validation
 app.post('/login', loginMediator.after_login);
 //app.post('/addalertdetail',guardMediator.add_alert);
 app.post('/logout', loginMediator.logout);
-//app.post('/assignGuard',guardMediator.assignGuardToBuilding);
-//app.post('/getAlertReport', clientMediator.getAlertReports);
-//
-//app.post('/getBuildingGuards',building.getBuildingGuards);
-//app.post('/getPatrolScheduleForReportSelected',clientMediator.getPatrolScheduleForReportSelected);
-//app.post('/getPatrolingReportDataForSelectedReport',clientMediator.getPatrolingReportDataForSelectedReport);
-//app.post('/getPatrolDataGuardComments',clientMediator.getPatrolDataGuardComments);
-//app.post('/verifyClient',building.verify_client_before_add_building);
 
-// CLient
-//app.post('/client',clientMediator.setClientDetails);
-//app.post('/deleteClient',clientMediator.deleteClientDetails);
-
-
-// Guard
-//app.post('/guard',guardMediator.setGuardDetails);
-//app.post('/deleteGuard',guardMediator.delete_Guard_Details);
-//app.post('/alerttype',guardMediator.setAlertDetails);
-//app.post('/getGuardLastLocation',guardMediator.getGuardLastLocation);
-
-
-// Building
-//app.post('/building',building.setBuildingDetails);
-//app.post('/deleteBuilding',building.delete_Building_Details);
-//app.post('/deleteCheckpoint',building.delete_CheckPoint);
-//app.post('/deleteAlertType',guardMediator.delete_AlertType);
-
-//Checkpoint
-//app.post('/checkpoint',building.setCheckpointDetails);
 
 http.createServer(app).listen(app.get('port'), function(){
   console.log('Express server listening on port ' + app.get('port'));
