@@ -19,6 +19,8 @@ var twitter = require('ntwitter');
 var sentimental = require('Sentimental');
 var twit = require('twit');
 
+var mq_client = require('./rpc/client');
+
 // all environments
 app.set('port', process.env.PORT || 3232);
 app.set('views', __dirname + '/views');
@@ -212,18 +214,9 @@ app.get('/',
     });
 
 
-function sentimentImage() {
-    var avg = tweetTotalSentiment / tweetCount;
-    if (avg > 0.5) { // happy
-        return "/images/excited.png";
-    }
-    if (avg < -0.5) { // angry
-        return "/images/angry.png";
-    }
-    // neutral
-    return "/images/content.png";
-}
 
+
+var itemArray = new Array();
 
 app.get('/monitor',function (req,res) {
     var stream;
@@ -232,55 +225,120 @@ app.get('/monitor',function (req,res) {
 //    if (monitoringPhrase) {
 //        resetMonitoring();
 //    }
-    
+    var today = new Date();
     var msg_payload = {
-    		"type":"sentiment"
+    		"type":"get"
     }
     
-    mq_client.make_request('product_queue', message, function(err,results){
+    mq_client.make_request('product_queue', msg_payload, function(err,results){
 		
 		if(err){
 			console.log("Post request Error");
 			throw err;
 		} else  {
 			if(results.code === "200"){
-				res.send({"value":"Success", "status": true});
+				var items = results.resultsData;
+				for(var i=0;i<items.length;i++)
+				{
+					console.log(items[i].itemname);
+					
+					 monitoringPhrase = items[i].itemname;
+					 
+					 console.log(monitoringPhrase);     
+					 calculatescore(monitoringPhrase,i,items.length);
+					//});
+				}
+				
 			} else {    
 				res.send({"value":"Fail", "status":false});
 			}
 		}  
 	});
     
-    
-    
-    monitoringPhrase = 'ISIS';
-    var today = new Date();
-    //console.log("hh"+phrase);
-    tweetCount = 0;
-    tweetTotalSentiment = 0;
-    //tweeter.verifyCredentials(function (error, data) {
-    //    if (error) {
-    //        return "Error connecting to Twitter: " + error;
-    //    } else {
-        	tweeter.get('search/tweets', {q: '' + monitoringPhrase + ' since:' + today.getFullYear() + '-' +
-        	      (today.getMonth() + 1) + '-' + today.getDate(), count:200}, function(err, data) {
-        	        // perform sentiment analysis
-        	    	// console.log(data['statuses']);
-        	        score = performAnalysis(data['statuses']);
-        	        console.log("score:", score);
-        	      //  console.log("choice:", choices[i]);
-        	        //  determine winner
-//        	        if(score > highestScore) {
-//        	          highestScore = score;
-//        	          highestChoice = choices[i];
-//        	          console.log("winner:",choices[i]);
-//        	        }
-        	 //       console.log("");
-        	      });
-           // return stream;
-     //   }
-   // });
 });
+
+function calculatescore(key,index,max)
+{	
+	 tweeter.get('search/tweets', {q: '' + key + ' since:' + today.getFullYear() + '-' +
+	      (today.getMonth() + 1) + '-' + today.getDate(), count:2000}, function(err, data) {
+	        // perform sentiment analysis
+	    	// console.log(data['statuses']);
+	        score = performAnalysis(data['statuses']);
+	        console.log(key+" score:"+ Math.floor(score));
+	        
+	        var itemObject = new Object();
+	        itemObject.name = key;
+	        itemObject.score = Math.floor(score);
+	        itemArray.push(itemObject);
+	        console.log(itemArray);  
+	        //item_sentiment.key = itemArray;
+	        
+	        if(itemArray.length == max)
+	        {
+	        	var item_sentiment = new Object();
+	        	item_sentiment.key = itemArray;
+	        	console.log(item_sentiment);
+	        	
+	        	 var msg_payload = {
+	        	    		"itemList":itemArray,
+	        	    		"type":"addsentiment"
+	        	    }
+	        	    
+	        	    mq_client.make_request('product_queue', msg_payload, function(err,results){
+	        		
+	        			if(err){
+	        				console.log("Post request Error");
+	        				throw err;
+	        			} else  {
+	        				if(results.code === "200"){
+	        					var items = results.resultsData;
+	        					
+	        				} else {    
+	        					//res.send({"value":"Fail", "status":false});
+	        				}
+	        			}  
+	        		});
+	        }
+	  });		
+	 
+}
+
+app.get('/addsentiment',function (req,res) {
+	
+   
+    
+});
+
+	
+	
+monitoringPhrase = 'ISIS';
+var today = new Date();
+//console.log("hh"+phrase);
+tweetCount = 0;
+tweetTotalSentiment = 0;
+//tweeter.verifyCredentials(function (error, data) {
+//    if (error) {
+//        return "Error connecting to Twitter: " + error;
+//    } else {
+    	tweeter.get('search/tweets', {q: '' + monitoringPhrase + ' since:' + today.getFullYear() + '-' +
+    	      (today.getMonth() + 1) + '-' + today.getDate(), count:200}, function(err, data) {
+    	        // perform sentiment analysis
+    	    	// console.log(data['statuses']);
+    	        score = performAnalysis(data['statuses']);
+    	        console.log("score:", score);
+    	      //  console.log("choice:", choices[i]);
+    	        //  determine winner
+//    	        if(score > highestScore) {
+//    	          highestScore = score;
+//    	          highestChoice = choices[i];
+//    	          console.log("winner:",choices[i]);
+//    	        }
+    	 //       console.log("");
+    	      });
+       // return stream;
+ //   }
+// });
+
 
 function performAnalysis(tweetSet) {
 	  //set a results variable
